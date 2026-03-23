@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Ahora usamos la ruta relativa dentro del workspace de Jenkins
-        DATASET_PATH = 'sdss_sample.csv' // Archivo dentro del repo
+        // Archivo CSV dentro del repo
+        DATASET_PATH = 'sdss_sample.csv'
     }
 
     stages {
@@ -11,8 +11,16 @@ pipeline {
             steps {
                 script {
                     echo 'Realizando checkout del repositorio...'
-                    // git url: 'https://github.com/tu-usuario/tu-repositorio.git', branch: 'main'
-                    // Jenkins clona el repo automáticamente si configuraste SCM
+                    git branch: 'main', url: 'https://github.com/Penia750/docker-jenkins-BigData.git'
+                }
+            }
+        }
+
+        stage('List Workspace (verificar CSV)') {
+            steps {
+                script {
+                    echo 'Listando archivos en el workspace para confirmar que sdss_sample.csv está presente'
+                    sh 'ls -l ${WORKSPACE}'
                 }
             }
         }
@@ -21,7 +29,6 @@ pipeline {
             steps {
                 script {
                     echo 'Construyendo imagen Docker e instalando dependencias...'
-                    // Construir la imagen Docker. Asegúrate de que Docker esté disponible en el agente de Jenkins.
                     sh 'docker build -t ml-pipeline-sdss .'
                 }
             }
@@ -31,7 +38,6 @@ pipeline {
             steps {
                 script {
                     echo 'Ejecutando pruebas básicas del dataset dentro del contenedor Docker...'
-                    // Montamos el dataset desde el workspace de Jenkins
                     sh '''
                         docker run --rm \
                         -v $(pwd)/basic_data_tests.py:/app/basic_data_tests.py \
